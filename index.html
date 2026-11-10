@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>APAH 250 Study Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky header with three views; works shown as museum wall labels (number, title, maker, then date / medium / place rows) */
+:root{
+  --bg:#eceeea; --surface:#f8f9f6; --sunk:#e2e5df; --ink:#1b211e; --muted:#5b645d; --line:#cdd3ca;
+  --accent:#2846b8; --accent-soft:#dfe5fb; --on-accent:#ffffff;
+  --good:#1d7449; --good-soft:#d9efe2; --bad:#ad3329; --bad-soft:#f6dedb;
+  --f-display:"Bricolage Grotesque","Archivo",system-ui,sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111412; --surface:#1a1f1c; --sunk:#151917; --ink:#e6eae5; --muted:#99a39b; --line:#2d3530;
+  --accent:#8fa5ff; --accent-soft:#1f2a52; --on-accent:#0e1330;
+  --good:#5fc490; --good-soft:#163526; --bad:#f08b80; --bad-soft:#3d1c19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111412; --surface:#1a1f1c; --sunk:#151917; --ink:#e6eae5; --muted:#99a39b; --line:#2d3530;
+  --accent:#8fa5ff; --accent-soft:#1f2a52; --on-accent:#0e1330;
+  --good:#5fc490; --good-soft:#163526; --bad:#f08b80; --bad-soft:#3d1c19; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:16px;padding-block:12px;flex-wrap:wrap}
+.brand{font:800 22px/1 var(--f-display);letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px}
+.brand small{font:500 11px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+nav{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:999px;margin-left:auto}
+nav a{padding:7px 16px;border-radius:999px;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px}
+nav a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0/.12)}
+.count{font:600 12px/1 var(--f-mono);color:var(--muted);white-space:nowrap}
+.count b{color:var(--accent)}
+main{padding-block:24px 64px}
+h2{font:700 clamp(24px,3.4vw,34px)/1.1 var(--f-display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.lede{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 6px}
+.search{flex:1 1 240px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none}
+.chk input{accent-color:var(--accent);width:16px;height:16px}
+
+/* select view */
+.unit{margin-top:28px}
+.unit-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:10px}
+.unit-head h3{font:700 19px/1.2 var(--f-display);margin:0;letter-spacing:-.01em}
+.unit-head .rng{font:500 12px var(--f-mono);color:var(--muted)}
+.unit-head .sp{flex:1}
+.unit-head .btn{padding:5px 10px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:6px}
+.work{display:flex;gap:10px;align-items:center;padding:6px 8px 6px 6px;border-radius:8px;border:1px solid transparent;cursor:pointer;min-width:0}
+.work:hover{background:var(--surface)}
+.work.on{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.work input{position:absolute;opacity:0;pointer-events:none}
+.work:has(input:focus-visible){outline:2px solid var(--accent)}
+.th{flex:0 0 52px;height:52px;border-radius:6px;background:var(--sunk);overflow:hidden;display:grid;place-items:center;font:600 13px var(--f-mono);color:var(--muted);position:relative}
+.th .sp{display:block;width:52px;height:52px;background:url(thumbs.webp) 0 0/832px 832px no-repeat}
+.work.on .th::after{content:"✓";position:absolute;inset:auto 3px 3px auto;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--on-accent);font:700 11px/18px var(--f-body);text-align:center}
+.wt{min-width:0}
+.wt .no{font:600 11px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.wt .tt{font-weight:600;font-size:14px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.wt .by{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.none{color:var(--muted);padding:24px 0}
+
+/* card */
+.stage{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:28px;margin-top:20px;align-items:start}
+@media (max-width:820px){.stage{grid-template-columns:1fr;gap:16px}}
+.fig{min-width:0}
+.views{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.vw{width:58px;height:58px;padding:0;border:2px solid transparent;border-radius:7px;overflow:hidden;background:var(--sunk);cursor:pointer}
+.vw img{width:100%;height:100%;object-fit:cover;display:block}
+.vw.on{border-color:var(--accent)}
+.vc{font:500 11.5px var(--f-mono);color:var(--muted);margin-left:4px}
+figure{margin:0;background:var(--sunk);border-radius:var(--r);overflow:hidden;display:grid;place-items:center;aspect-ratio:4/3;max-width:100%}
+figure img{width:100%;height:100%;object-fit:contain}
+.ph{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:24px;text-align:center;
+  background:repeating-linear-gradient(135deg,transparent 0 14px,color-mix(in srgb,var(--line) 55%,transparent) 14px 15px)}
+.ph .big{font:800 clamp(48px,9vw,96px)/1 var(--f-display);color:var(--line);letter-spacing:-.04em}
+.ph p{margin:0;color:var(--muted);font-size:13.5px;max-width:34ch}
+.ph .links{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ph a{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid var(--line);background:var(--surface);padding:6px 10px;border-radius:999px}
+.label{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 22px 18px}
+.label .no{font:600 12px var(--f-mono);color:var(--accent);letter-spacing:.06em;text-transform:uppercase}
+.label h3{font:700 clamp(22px,2.6vw,28px)/1.15 var(--f-display);letter-spacing:-.015em;margin:6px 0 4px;text-wrap:balance}
+.label .maker{color:var(--muted);font-weight:500;margin:0 0 14px}
+dl{margin:0;display:grid;gap:0}
+dl div{display:grid;grid-template-columns:118px 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+dt{font:600 11px/1.9 var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+dd{margin:0;min-width:0}
+.hide dd{cursor:pointer}
+.hide dd:not(.shown){color:transparent;background:var(--sunk);border-radius:5px;user-select:none}
+.hide dd:not(.shown)::after{content:"tap to reveal";color:var(--muted);font-size:12px;font-family:var(--f-mono);margin-left:-.3em}
+.hide dd:not(.shown) *{visibility:hidden}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.ctrls .pos{font:600 13px var(--f-mono);color:var(--muted);margin:0 6px;font-variant-numeric:tabular-nums}
+.ctrls .sp{flex:1}
+.hint{font:500 11.5px var(--f-mono);color:var(--muted);margin-top:10px}
+
+/* quiz */
+.qset{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:14px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.qset .lab{font:600 11px var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.score{display:flex;gap:18px;margin-left:auto;font:600 13px var(--f-mono);font-variant-numeric:tabular-nums}
+.score span{color:var(--muted);font-weight:400}
+.prompt{font:700 clamp(20px,2.4vw,25px)/1.2 var(--f-display);margin:4px 0 14px;letter-spacing:-.01em}
+.qtitle{font-weight:600;margin:0 0 4px}
+.qtitle.mute{color:var(--muted);font-weight:500;font-style:italic}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--surface);padding:11px 14px 11px 44px;border-radius:9px;cursor:pointer;position:relative;line-height:1.35;min-height:46px}
+.opt::before{content:attr(data-k);position:absolute;left:12px;top:11px;width:21px;height:21px;border-radius:5px;background:var(--sunk);font:600 12px/21px var(--f-mono);text-align:center;color:var(--muted)}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt[disabled]{cursor:default}
+.opt.right{background:var(--good-soft);border-color:var(--good)}
+.opt.right::before{background:var(--good);color:var(--surface);content:"✓"}
+.opt.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.wrong::before{background:var(--bad);color:var(--surface);content:"✕"}
+.verdict{margin-top:14px;padding:14px 16px;border-radius:9px;background:var(--surface);border:1px solid var(--line)}
+.verdict b.ok{color:var(--good)} .verdict b.no{color:var(--bad)}
+.verdict dl div{grid-template-columns:96px 1fr;padding:6px 0}
+.empty{margin-top:24px;padding:36px 24px;border:1px dashed var(--line);border-radius:var(--r);text-align:center}
+.empty p{color:var(--muted);margin:6px auto 16px;max-width:46ch}
+.empty .ctrls{justify-content:center}
+@media (max-width:560px){nav{margin-left:0;width:100%}nav a{flex:1;text-align:center}.score{margin-left:0}dl div{grid-template-columns:92px 1fr}}
+@media (prefers-reduced-motion:no-preference){.card-in{animation:in .22s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <div class="brand">APAH 250 <small>Study room</small></div>
+    <span class="count" id="count"></span>
+    <nav aria-label="Views">
+      <a href="#select" data-v="select">Select</a>
+      <a href="#study" data-v="study">Study</a>
+      <a href="#quiz" data-v="quiz">Quiz</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="v-select">
+    <h2>Choose your works</h2>
+    <p class="lede">Tick any of the 250 required works, or take a whole content area at once. Your picks stay saved in this browser and feed Study and Quiz.</p>
+    <div class="toolbar">
+      <input class="search" id="q" type="search" placeholder="Search title, artist, medium, place, or number" aria-label="Search works">
+      <label class="chk"><input type="checkbox" id="onlySel"> Selected only</label>
+      <button class="btn" id="selAll">Select all 250</button>
+      <button class="btn ghost" id="selNone">Clear</button>
+    </div>
+    <div id="units"></div>
+  </section>
+
+  <section id="v-study" hidden>
+    <div class="toolbar" style="margin-top:0">
+      <h2 style="margin-right:auto">Study</h2>
+      <label class="chk"><input type="checkbox" id="hideDet"> Hide details (flashcard)</label>
+      <button class="btn" id="shuf">Shuffle</button>
+      <button class="btn ghost" id="order">Number order</button>
+    </div>
+    <div id="studyBody"></div>
+  </section>
+
+  <section id="v-quiz" hidden>
+    <h2>Quiz</h2>
+    <div class="qset">
+      <span class="lab">Ask about</span>
+      <label class="chk"><input type="checkbox" class="qf" value="date" checked> Date</label>
+      <label class="chk"><input type="checkbox" class="qf" value="artist" checked> Artist</label>
+      <label class="chk"><input type="checkbox" class="qf" value="medium" checked> Medium</label>
+      <label class="chk"><input type="checkbox" class="qf" value="place" checked> Movement / location</label>
+      <label class="chk"><input type="checkbox" id="showTitle" checked> Show title</label>
+      <div class="score" id="score"></div>
+    </div>
+    <div id="quizBody"></div>
+  </section>
+</main>
+
+<script>
+const RAW = [[1,"Apollo 11 Stones","","c. 25,500–25,300 BCE","Charcoal on stone","Paleolithic · Namibia",-25400,1],[2,"Great Hall of the Bulls","","15,000–13,000 BCE","Rock painting","Paleolithic Europe · Lascaux, France",-14000,1],[3,"Camelid sacrum in the shape of a canine","","14,000–7000 BCE","Bone","Prehistoric · Tequixquiac, central Mexico",-10500,1],[4,"Running horned woman","","6000–4000 BCE","Pigment on rock","Neolithic · Tassili n'Ajjer, Algeria",-5000,1],[5,"Beaker with ibex motifs","","4200–3500 BCE","Painted terra cotta","Neolithic · Susa, Iran",-3850,1],[6,"Anthropomorphic stele","","4th millennium BCE","Sandstone","Neolithic · Arabian Peninsula",-3500,1],[7,"Jade cong","","3300–2200 BCE","Carved jade","Liangzhu culture · China",-2750,1],[8,"Stonehenge","","c. 2500–1600 BCE","Sandstone","Neolithic Europe · Wiltshire, England",-2050,2],[9,"The Ambum Stone","","c. 1500 BCE","Greywacke","Prehistoric · Ambum Valley, Papua New Guinea",-1500,1],[10,"Tlatilco female figurine","","1200–900 BCE","Ceramic","Tlatilco · central Mexico",-1050,1],[11,"Terra cotta fragment","","c. 1000 BCE","Incised terra cotta","Lapita · Reef Islands, Solomon Islands",-1000,1],[12,"White Temple and its ziggurat","","c. 3500–3000 BCE","Mud brick","Sumerian · Uruk (Warka, Iraq)",-3250,2],[13,"Palette of King Narmer","","c. 3000–2920 BCE","Greywacke","Predynastic Egypt",-2960,2],[14,"Statues of votive figures, Square Temple at Eshnunna","","c. 2700 BCE","Gypsum inlaid with shell and black limestone","Sumerian · Tell Asmar, Iraq",-2700,1],[15,"Seated scribe","","c. 2620–2500 BCE","Painted limestone","Old Kingdom Egypt, 4th Dynasty · Saqqara",-2560,1],[16,"Standard of Ur","","c. 2600–2400 BCE","Wood inlaid with shell, lapis lazuli, and red limestone","Sumerian · Royal Tombs of Ur, Iraq",-2500,2],[17,"Great Pyramids (Menkaure, Khafre, Khufu) and Great Sphinx","","c. 2550–2490 BCE","Cut limestone","Old Kingdom Egypt, 4th Dynasty · Giza",-2520,2],[18,"King Menkaure and queen","","c. 2490–2472 BCE","Greywacke","Old Kingdom Egypt, 4th Dynasty",-2480,1],[19,"The Code of Hammurabi","","c. 1792–1750 BCE","Basalt","Babylonian · Susa, Iran",-1770,1],[20,"Temple of Amun-Re and Hypostyle Hall","","temple c. 1550 BCE; hall c. 1250 BCE","Cut sandstone and mud brick","New Kingdom Egypt · Karnak, near Luxor",-1400,3],[21,"Mortuary temple of Hatshepsut","","c. 1473–1458 BCE","Sandstone carved into cliff, red granite","New Kingdom Egypt, 18th Dynasty · near Luxor",-1465,2],[22,"Akhenaton, Nefertiti, and three daughters","","c. 1353–1335 BCE","Limestone","New Kingdom Egypt (Amarna), 18th Dynasty",-1344,1],[23,"Tutankhamun's tomb, innermost coffin","","c. 1323 BCE","Gold with inlay of enamel and semiprecious stones","New Kingdom Egypt, 18th Dynasty",-1323,1],[24,"Last judgment of Hu-Nefer (Book of the Dead)","","c. 1275 BCE","Painted papyrus scroll","New Kingdom Egypt, 19th Dynasty",-1275,1],[25,"Lamassu from the citadel of Sargon II","","c. 720–705 BCE","Alabaster","Neo-Assyrian · Dur Sharrukin (Khorsabad, Iraq)",-712,1],[26,"Athenian agora","","600 BCE–150 CE","Plan (civic architecture)","Archaic–Hellenistic Greek · Athens",-200,1],[27,"Anavysos Kouros","","c. 530 BCE","Marble with remnants of paint","Archaic Greek",-530,1],[28,"Peplos Kore from the Acropolis","","c. 530 BCE","Marble, painted details","Archaic Greek · Athens",-529,1],[29,"Sarcophagus of the Spouses","","c. 520 BCE","Terra cotta","Etruscan · Cerveteri, Italy",-520,1],[30,"Audience Hall (apadana) of Darius and Xerxes","","c. 520–465 BCE","Limestone","Achaemenid Persian · Persepolis, Iran",-492,2],[31,"Temple of Minerva and sculpture of Apollo","Vulca (master sculptor)","c. 510–500 BCE","Wood, mud brick, or tufa (temple); terra cotta (sculpture)","Etruscan · Veii, near Rome",-505,3],[32,"Tomb of the Triclinium","","c. 480–470 BCE","Tufa and fresco","Etruscan · Tarquinia, Italy",-475,1],[33,"Niobides Krater","Niobid Painter","c. 460–450 BCE","Clay, red-figure technique with white highlights","Classical Greek",-455,2],[34,"Doryphoros (Spear Bearer)","Polykleitos","original 450–440 BCE","Roman marble copy of Greek bronze original","Classical Greek",-445,1],[35,"Acropolis (Parthenon and sculpture)","Iktinos and Kallikrates","c. 447–410 BCE","Marble","Classical Greek · Athens",-430,6],[36,"Grave stele of Hegeso","attributed to Kallimachos","c. 410 BCE","Marble and paint","Classical Greek · Athens",-410,1],[37,"Winged Victory of Samothrace","","c. 190 BCE","Marble","Hellenistic Greek · Samothrace",-190,1],[38,"Great Altar of Zeus and Athena at Pergamon","","c. 175 BCE","Marble (architecture and sculpture)","Hellenistic Greek · Pergamon, Turkey",-175,3],[39,"House of the Vettii","","c. 2nd century BCE; rebuilt 62–79 CE","Cut stone and fresco","Imperial Roman · Pompeii",0,3],[40,"Alexander Mosaic from the House of the Faun","","c. 100 BCE","Mosaic","Republican Roman · Pompeii",-100,1],[41,"Seated boxer","","c. 100 BCE","Bronze","Hellenistic Greek",-99,1],[42,"Head of a Roman patrician","","c. 75–50 BCE","Marble","Republican Roman (verism)",-62,1],[43,"Augustus of Prima Porta","","early 1st century CE","Marble","Imperial Roman",15,1],[44,"Colosseum (Flavian Amphitheater)","","70–80 CE","Stone and concrete","Imperial Roman · Rome",75,2],[45,"Forum of Trajan","Apollodorus of Damascus","106–113 CE","Brick and concrete; marble (column)","Imperial Roman · Rome",110,4],[46,"Pantheon","","118–125 CE","Concrete with stone facing","Imperial Roman · Rome",122,2],[47,"Ludovisi Battle Sarcophagus","","c. 250 CE","Marble","Late Imperial Roman",250,1],[48,"Catacomb of Priscilla","","c. 200–400 CE","Excavated tufa and fresco","Late Antique Europe · Rome",300,3],[49,"Santa Sabina","","c. 422–432 CE","Brick and stone, wooden roof","Late Antique Europe · Rome",427,3],[50,"Rebecca and Eliezer at the Well and Jacob Wrestling the Angel (Vienna Genesis)","","early 6th century CE","Illuminated manuscript (tempera, gold, and silver on purple vellum)","Early Byzantine Europe",510,2],[51,"San Vitale","","c. 526–547 CE","Brick, marble, and stone veneer; mosaic","Early Byzantine Europe · Ravenna, Italy",536,5],[52,"Hagia Sophia","Anthemius of Tralles and Isidorus of Miletus","532–537 CE","Brick and ceramic elements with stone and mosaic veneer","Byzantine · Constantinople (Istanbul)",535,3],[53,"Merovingian looped fibulae","","mid-6th century CE","Silver gilt worked in filigree, with inlays of garnets and other stones","Early medieval Europe (Merovingian)",550,1],[54,"Virgin (Theotokos) and Child between Saints Theodore and George","","6th or early 7th century CE","Encaustic on wood","Early Byzantine · Saint Catherine's Monastery, Sinai",600,1],[55,"Lindisfarne Gospels","","c. 700 CE","Illuminated manuscript (ink, pigments, and gold on vellum)","Early medieval Hiberno-Saxon · Northumbria, England",700,3],[56,"Great Mosque of Córdoba","","c. 785–786 CE","Stone masonry","Umayyad · Córdoba, Spain",785,5],[57,"Pyxis of al-Mughira","","c. 968 CE","Ivory","Umayyad · Madinat al-Zahra, Spain",968,1],[58,"Church of Sainte-Foy and Reliquary of Sainte-Foy","","church c. 1050–1130 CE; reliquary 9th century CE","Stone (church); gold, silver, gemstones, and enamel over wood (reliquary)","Romanesque · Conques, France",1090,4],[59,"Bayeux Tapestry","","c. 1066–1080 CE","Embroidery on linen","Romanesque (English or Norman)",1073,2],[60,"Chartres Cathedral","","c. 1145–1155 CE; rebuilt c. 1194–1220 CE","Limestone, stained glass","Gothic · Chartres, France",1194,6],[61,"Dedication Page with Blanche of Castile and King Louis IX (Bible moralisée)","","c. 1225–1245 CE","Illuminated manuscript (ink, tempera, and gold leaf on vellum)","Gothic · Paris, France",1235,2],[62,"Röttgen Pietà","","c. 1300–1325 CE","Painted wood","Late medieval Germany",1312,1],[63,"Arena (Scrovegni) Chapel, including Lamentation","Giotto di Bondone","chapel c. 1303 CE; fresco c. 1305 CE","Brick (architecture) and fresco","Proto-Renaissance · Padua, Italy",1305,3],[64,"Golden Haggadah","","c. 1320 CE","Illuminated manuscript (pigments and gold leaf on vellum)","Late medieval Spain (Catalonia)",1320,3],[65,"Alhambra","","1354–1391 CE","Whitewashed adobe stucco, wood, tile, paint, and gilding","Nasrid Dynasty · Granada, Spain",1370,4],[66,"Annunciation Triptych (Merode Altarpiece)","Workshop of Robert Campin","1427–1432 CE","Oil on wood","Northern Renaissance · Flanders",1430,1],[67,"Pazzi Chapel","Filippo Brunelleschi","c. 1429–1461 CE","Masonry","Italian Renaissance · Florence",1440,2],[68,"The Arnolfini Portrait","Jan van Eyck","c. 1434 CE","Oil on wood","Northern Renaissance · Bruges",1434,1],[69,"David","Donatello","c. 1440–1460 CE","Bronze","Italian Renaissance · Florence",1450,1],[70,"Palazzo Rucellai","Leon Battista Alberti","c. 1450 CE","Stone, masonry","Italian Renaissance · Florence",1451,1],[71,"Madonna and Child with Two Angels","Fra Filippo Lippi","c. 1465 CE","Tempera on wood","Italian Renaissance · Florence",1465,1],[72,"Birth of Venus","Sandro Botticelli","c. 1484–1486 CE","Tempera on canvas","Italian Renaissance · Florence",1485,1],[73,"Last Supper","Leonardo da Vinci","c. 1494–1498 CE","Oil and tempera","High Renaissance · Milan",1496,1],[74,"Adam and Eve","Albrecht Dürer","1504 CE","Engraving","Northern Renaissance · Germany",1504,1],[75,"Sistine Chapel ceiling and altar wall frescoes","Michelangelo","ceiling c. 1508–1512 CE; altar wall c. 1536–1541 CE","Fresco","High Renaissance · Vatican City",1515,4],[76,"School of Athens","Raphael","1509–1511 CE","Fresco","High Renaissance · Vatican City",1510,1],[77,"Isenheim Altarpiece","Matthias Grünewald","c. 1512–1516 CE","Oil on wood","Northern Renaissance · Isenheim, Alsace",1514,2],[78,"Entombment of Christ","Jacopo da Pontormo","1525–1528 CE","Oil on wood","Mannerism · Florence",1526,1],[79,"Allegory of Law and Grace","Lucas Cranach the Elder","c. 1530 CE","Woodcut and letterpress","Protestant Reformation · Germany",1530,1],[80,"Venus of Urbino","Titian","c. 1538 CE","Oil on canvas","Venetian Renaissance",1538,1],[81,"Frontispiece of the Codex Mendoza","","c. 1541–1542 CE","Ink and color on paper","Viceroyalty of New Spain · Mexico",1541,1],[82,"Il Gesù, including Triumph of the Name of Jesus ceiling fresco","Giacomo da Vignola, Giacomo della Porta, Giovanni Battista Gaulli","facade 1568–1584 CE; fresco 1676–1679 CE","Brick, marble, fresco, and stucco","Counter-Reformation / Baroque · Rome",1580,3],[83,"Hunters in the Snow","Pieter Bruegel the Elder","1565 CE","Oil on wood","Northern Renaissance · Flanders",1565,1],[84,"Mosque of Selim II","Sinan","1568–1575 CE","Brick and stone","Ottoman · Edirne, Turkey",1572,3],[85,"Calling of Saint Matthew","Caravaggio","c. 1597–1601 CE","Oil on canvas","Italian Baroque · Rome",1599,1],[86,"Henri IV Receives the Portrait of Marie de' Medici","Peter Paul Rubens","1621–1625 CE","Oil on canvas","Flemish Baroque",1623,1],[87,"Self-Portrait with Saskia","Rembrandt van Rijn","1636 CE","Etching","Dutch Baroque",1636,1],[88,"San Carlo alle Quattro Fontane","Francesco Borromini","1638–1646 CE","Stone and stucco","Italian Baroque · Rome",1642,3],[89,"Ecstasy of Saint Teresa, Cornaro Chapel","Gian Lorenzo Bernini","c. 1647–1652 CE","Marble (sculpture); stucco and gilded bronze (chapel)","Italian Baroque · Rome",1649,3],[90,"Angel with Arquebus, Asiel Timor Dei","Master of Calamarca","c. 17th century CE","Oil on canvas","Colonial Andean (La Paz School) · Bolivia",1680,1],[91,"Las Meninas","Diego Velázquez","c. 1656 CE","Oil on canvas","Spanish Baroque",1656,1],[92,"Woman Holding a Balance","Johannes Vermeer","c. 1664 CE","Oil on canvas","Dutch Baroque",1664,1],[93,"The Palace at Versailles","Louis Le Vau and Jules Hardouin-Mansart","begun 1669 CE","Masonry, stone, wood, iron, and gold leaf; marble and bronze sculpture; gardens","French Baroque · Versailles",1669,5],[94,"Screen with the Siege of Belgrade and hunting scene","Circle of the González Family","c. 1697–1701 CE","Tempera and resin on wood, shell inlay (biombo)","Viceroyalty of New Spain · Mexico",1699,2],[95,"The Virgin of Guadalupe","Miguel González","c. 1698 CE","Oil on canvas on wood, inlaid with mother-of-pearl (enconchado)","Viceroyalty of New Spain · Mexico",1698,1],[96,"Fruit and Insects","Rachel Ruysch","1711 CE","Oil on wood","Dutch still life",1711,1],[97,"Spaniard and Indian Produce a Mestizo","attributed to Juan Rodríguez Juárez","c. 1715 CE","Oil on canvas","Casta painting · New Spain",1715,1],[98,"The Tête à Tête, from Marriage A-la-Mode","William Hogarth","c. 1743 CE","Oil on canvas","Rococo satire · England",1743,1],[99,"Portrait of Sor Juana Inés de la Cruz","Miguel Cabrera","c. 1750 CE","Oil on canvas","Viceroyalty of New Spain · Mexico",1750,1],[100,"A Philosopher Giving a Lecture on the Orrery","Joseph Wright of Derby","c. 1763–1765 CE","Oil on canvas","Enlightenment · England",1764,1],[101,"The Swing","Jean-Honoré Fragonard","1767 CE","Oil on canvas","Rococo · France",1767,1],[102,"Monticello","Thomas Jefferson","1768–1809 CE","Brick, glass, stone, and wood","Neoclassical · Virginia, U.S.",1790,2],[103,"The Oath of the Horatii","Jacques-Louis David","1784 CE","Oil on canvas","Neoclassicism · France",1784,1],[104,"George Washington","Jean-Antoine Houdon","1788–1792 CE","Marble","Neoclassicism · Richmond, Virginia",1790,1],[105,"Self-Portrait","Élisabeth Louise Vigée Le Brun","1790 CE","Oil on canvas","Late Rococo / Neoclassicism · France",1790,1],[106,"Y no hai remedio (And There's Nothing to Be Done), Disasters of War, plate 15","Francisco de Goya","1810–1823 CE (published 1863)","Etching, drypoint, burin, and burnishing","Romanticism · Spain",1815,1],[107,"La Grande Odalisque","Jean-Auguste-Dominique Ingres","1814 CE","Oil on canvas","Neoclassicism / Orientalism · France",1814,1],[108,"Liberty Leading the People","Eugène Delacroix","1830 CE","Oil on canvas","Romanticism · France",1830,1],[109,"The Oxbow","Thomas Cole","1836 CE","Oil on canvas","Hudson River School · U.S.",1836,1],[110,"Still Life in Studio","Louis-Jacques-Mandé Daguerre","1837 CE","Daguerreotype","Early photography · France",1837,1],[111,"Slave Ship","Joseph Mallord William Turner","1840 CE","Oil on canvas","Romanticism · England",1840,1],[112,"Palace of Westminster (Houses of Parliament)","Charles Barry and Augustus W. N. Pugin","1840–1870 CE","Limestone masonry and glass","Gothic Revival · London",1855,3],[113,"The Stone Breakers","Gustave Courbet","1849 CE (destroyed 1945)","Oil on canvas","Realism · France",1849,1],[114,"Nadar Raising Photography to the Height of Art","Honoré Daumier","1862 CE","Lithograph","Realism / caricature · France",1862,1],[115,"Olympia","Édouard Manet","1863 CE","Oil on canvas","Realism / proto-Impressionism · France",1863,1],[116,"The Saint-Lazare Station","Claude Monet","1877 CE","Oil on canvas","Impressionism · Paris",1877,1],[117,"The Horse in Motion","Eadweard Muybridge","1878 CE","Albumen print","Early photography · California, U.S.",1878,1],[118,"The Valley of Mexico from the Hillside of Santa Isabel","José María Velasco","1882 CE","Oil on canvas","Mexican landscape painting · Mexico",1882,1],[119,"The Burghers of Calais","Auguste Rodin","1884–1895 CE","Bronze","Late 19th-century sculpture · France",1889,1],[120,"The Starry Night","Vincent van Gogh","1889 CE","Oil on canvas","Post-Impressionism · France",1889,1],[121,"The Coiffure","Mary Cassatt","1890–1891 CE","Drypoint and aquatint","Impressionism / Japonisme",1890,1],[122,"The Scream","Edvard Munch","1893 CE","Tempera and pastels on cardboard","Symbolism / Expressionism · Norway",1893,1],[123,"Where do we come from? What are we? Where are we going?","Paul Gauguin","1897–1898 CE","Oil on canvas","Post-Impressionism · Tahiti",1897,1],[124,"Carson, Pirie, Scott and Company Building","Louis Sullivan","1899–1903 CE","Iron, steel, glass, and terra cotta","Chicago School · Chicago, U.S.",1901,3],[125,"Mont Sainte-Victoire","Paul Cézanne","1902–1904 CE","Oil on canvas","Post-Impressionism · France",1903,1],[126,"Les Demoiselles d'Avignon","Pablo Picasso","1907 CE","Oil on canvas","Proto-Cubism · Paris",1907,1],[127,"The Steerage","Alfred Stieglitz","1907 CE","Photogravure","Modernist photography · U.S.",1907,1],[128,"The Kiss","Gustav Klimt","1907–1908 CE","Oil and gold leaf on canvas","Vienna Secession / Art Nouveau",1908,1],[129,"The Kiss","Constantin Brancusi","original 1907–1908 CE","Limestone","Modernist sculpture · Paris",1908,1],[130,"The Portuguese","Georges Braque","1911 CE","Oil on canvas","Analytic Cubism · France",1911,1],[131,"Goldfish","Henri Matisse","1912 CE","Oil on canvas","Fauvism · France",1912,1],[132,"Improvisation 28 (second version)","Vassily Kandinsky","1912 CE","Oil on canvas","Der Blaue Reiter / Abstraction · Germany",1912,1],[133,"Self-Portrait as a Soldier","Ernst Ludwig Kirchner","1915 CE","Oil on canvas","German Expressionism (Die Brücke)",1915,1],[134,"Memorial Sheet for Karl Liebknecht","Käthe Kollwitz","1919–1920 CE","Woodcut","German Expressionism",1919,1],[135,"Villa Savoye","Le Corbusier","1929 CE","Steel and reinforced concrete","International Style · Poissy, France",1929,2],[136,"Composition with Red, Blue and Yellow","Piet Mondrian","1930 CE","Oil on canvas","De Stijl · Netherlands",1930,1],[137,"Illustration from The Results of the First Five-Year Plan","Varvara Stepanova","1932 CE","Photomontage","Constructivism · Soviet Union",1932,1],[138,"Object (Le Déjeuner en fourrure)","Meret Oppenheim","1936 CE","Fur-covered cup, saucer, and spoon","Surrealism",1936,1],[139,"Fallingwater","Frank Lloyd Wright","1936–1939 CE","Reinforced concrete, sandstone, steel, and glass","Organic architecture · Pennsylvania, U.S.",1937,3],[140,"The Two Fridas","Frida Kahlo","1939 CE","Oil on canvas","Mexican modernism / Surrealism",1939,1],[141,"The Migration of the Negro, Panel no. 49","Jacob Lawrence","1940–1941 CE","Casein tempera on hardboard","Harlem Renaissance · U.S.",1940,1],[142,"The Jungle","Wifredo Lam","1943 CE","Gouache on paper mounted on canvas","Surrealism / Afro-Cuban modernism",1943,1],[143,"Dream of a Sunday Afternoon in the Alameda Park","Diego Rivera","1947–1948 CE","Fresco","Mexican Muralism · Mexico City",1947,1],[144,"Fountain (second version)","Marcel Duchamp","1950 CE (original 1917)","Readymade glazed sanitary china with black paint","Dada",1950,1],[145,"Woman, I","Willem de Kooning","1950–1952 CE","Oil on canvas","Abstract Expressionism · New York",1951,1],[146,"Seagram Building","Ludwig Mies van der Rohe and Philip Johnson","1954–1958 CE","Steel frame with glass curtain wall and bronze","International Style · New York City",1956,1],[147,"Marilyn Diptych","Andy Warhol","1962 CE","Oil, acrylic, and silkscreen enamel on canvas","Pop Art · U.S.",1962,1],[148,"Narcissus Garden","Yayoi Kusama","original 1966 CE","Mirror balls","Installation / performance · Venice Biennale",1966,1],[149,"The Bay","Helen Frankenthaler","1963 CE","Acrylic on canvas","Color Field painting · U.S.",1963,1],[150,"Lipstick (Ascending) on Caterpillar Tracks","Claes Oldenburg","1969–1974 CE","Cor-ten steel, aluminum, and cast resin; painted with polyurethane enamel","Pop Art · Yale University",1971,1],[151,"Spiral Jetty","Robert Smithson","1970 CE","Earthwork: mud, salt crystals, rocks, and water","Land Art · Great Salt Lake, Utah",1970,1],[152,"House in New Castle County","Robert Venturi, John Rauch, and Denise Scott Brown","1978–1983 CE","Wood frame and stucco","Postmodern architecture · Delaware, U.S.",1980,2],[153,"Chavín de Huántar","","900–200 BCE","Stone (architecture); granite (Lanzón); hammered gold alloy (jewelry)","Chavín · northern highlands, Peru",-550,4],[154,"Mesa Verde cliff dwellings","","450–1300 CE","Sandstone","Ancestral Puebloan · Montezuma County, Colorado",875,1],[155,"Yaxchilán","","725 CE","Limestone (architectural complex)","Maya · Chiapas, Mexico",725,3],[156,"Great Serpent Mound","","c. 1070 CE","Earthwork / effigy mound","Mississippian (Eastern Woodlands) · Adams County, Ohio",1070,1],[157,"Templo Mayor (Main Temple)","","1375–1520 CE","Stone (temple); volcanic stone, jadeite, and basalt (sculpture)","Mexica (Aztec) · Tenochtitlan (Mexico City)",1447,4],[158,"Ruler's feather headdress (probably of Motecuhzoma II)","","1428–1520 CE","Feathers (quetzal and cotinga) and gold","Mexica (Aztec)",1474,1],[159,"City of Cusco: Qorikancha, Santo Domingo, and walls at Saqsa Waman","","c. 1440 CE; convent 1550–1650 CE","Andesite","Inka · Cusco, Peru",1440,3],[160,"Maize cobs","","c. 1440–1533 CE","Sheet metal / repoussé, metal alloys","Inka",1486,1],[161,"City of Machu Picchu","","c. 1450–1540 CE","Granite (architectural complex)","Inka · central highlands, Peru",1495,3],[162,"All-T'oqapu tunic","","1450–1540 CE","Camelid fiber and cotton","Inka",1496,1],[163,"Bandolier bag","","c. 1850 CE","Beadwork on leather","Lenape (Delaware) · Eastern Woodlands",1850,1],[164,"Transformation mask","","late 19th century CE","Wood, paint, and string","Kwakwaka'wakw · Northwest Coast, Canada",1880,2],[165,"Painted elk hide","attributed to Cotsiogo (Cadzi Cody)","c. 1890–1900 CE","Painted elk hide","Eastern Shoshone · Wind River Reservation, Wyoming",1895,1],[166,"Black-on-black ceramic vessel","Maria Martínez and Julian Martínez","mid-20th century CE","Blackware ceramic","Tewa (Puebloan) · San Ildefonso Pueblo, New Mexico",1940,1],[167,"Conical tower and circular wall of Great Zimbabwe","","c. 1000–1400 CE","Coursed granite blocks","Shona peoples · southeastern Zimbabwe",1200,2],[168,"Great Mosque of Djenné","","founded c. 1200 CE; rebuilt 1906–1907 CE","Adobe","Mali · Djenné",1907,2],[169,"Wall plaque, from Oba's palace","","16th century CE","Cast brass","Edo peoples · Benin (Nigeria)",1550,2],[170,"Sika dwa kofi (Golden Stool)","","c. 1700 CE","Gold over wood and cast-gold attachments","Ashanti peoples · south central Ghana",1700,2],[171,"Ndop (portrait figure) of King Mishe miShyaang maMbul","","c. 1760–1780 CE","Wood","Kuba peoples · Democratic Republic of the Congo",1770,2],[172,"Power figure (Nkisi n'kondi)","","c. late 19th century CE","Wood and metal","Kongo peoples · Democratic Republic of the Congo",1885,1],[173,"Female (Pwo) mask","","late 19th to early 20th century CE","Wood, fiber, pigment, and metal","Chokwe peoples · Democratic Republic of the Congo",1895,1],[174,"Portrait mask (Mblo)","","early 20th century CE","Wood and pigment","Baule peoples · Côte d'Ivoire",1913,2],[175,"Bundu mask","","19th to 20th century CE","Wood, cloth, and fiber","Sande Society, Mende peoples · Sierra Leone and Liberia",1900,2],[176,"Ikenga (shrine figure)","","c. 19th to 20th century CE","Wood","Igbo peoples · Nigeria",1901,1],[177,"Lukasa (memory board)","","c. 19th to 20th century CE","Wood, beads, and metal","Mbudye Society, Luba peoples · Democratic Republic of the Congo",1902,2],[178,"Aka elephant mask","","c. 19th to 20th century CE","Wood, woven raffia, cloth, and beads","Bamileke · western grassfields, Cameroon",1903,2],[179,"Reliquary figure (byeri)","","c. 19th to 20th century CE","Wood","Fang peoples · southern Cameroon",1899,1],[180,"Veranda post of enthroned king and senior wife (Opo Ogoga)","Olowe of Ise","c. 1910–1914 CE","Wood and pigment","Yoruba peoples · Ikere, Nigeria",1912,1],[181,"Petra: Treasury and Great Temple","","c. 400 BCE–100 CE","Cut rock","Nabataean (Ptolemaic and Roman influence) · Jordan",-150,3],[182,"Buddha","","c. 400–800 CE (destroyed 2001)","Cut rock with plaster and polychrome paint","Gandharan · Bamiyan, Afghanistan",600,2],[183,"The Kaaba","","pre-Islamic; rededicated 631–632 CE","Granite masonry, covered with silk curtain and gold and silver-wrapped thread calligraphy","Islamic · Mecca, Saudi Arabia",631,3],[184,"Jowo Rinpoche, enshrined in the Jokhang Temple","","believed brought to Tibet 641 CE","Gilt metals with semiprecious stones, pearls, and paint; various offerings","Yarlung Dynasty · Lhasa, Tibet",641,1],[185,"Dome of the Rock","","691–692 CE","Stone masonry, wooden roof, glazed ceramic tile, mosaics, gilt aluminum and bronze dome","Islamic, Umayyad · Jerusalem",691,2],[186,"Great Mosque (Masjid-e Jameh)","","c. 700 CE; additions 14th, 18th, and 20th centuries","Stone, brick, wood, plaster, and glazed ceramic tile","Islamic, Persian (Seljuk–Safavid) · Isfahan, Iran",1100,4],[187,"Folio from a Qur'an","","c. 8th to 9th century CE","Ink, color, and gold on parchment","Abbasid · Arab, North Africa, or Near East",800,1],[188,"Basin (Baptistère de St. Louis)","Muhammad ibn al-Zain","c. 1320–1340 CE","Brass inlaid with gold and silver","Mamluk · Egypt or Syria",1330,1],[189,"Bahram Gur Fights the Karg (Great Il-Khanid Shahnama)","","c. 1330–1340 CE","Ink and opaque watercolor, gold, and silver on paper","Islamic, Persian (Il-Khanid)",1335,1],[190,"The Court of Gayumars (Shah Tahmasp's Shahnama)","Sultan Muhammad","c. 1522–1525 CE","Ink, opaque watercolor, and gold on paper","Safavid · Tabriz, Iran",1523,1],[191,"The Ardabil Carpet","Maqsud of Kashan","1539–1540 CE","Silk and wool","Safavid · Iran",1539,1],[192,"Great Stupa at Sanchi","","c. 300 BCE–100 CE","Stone masonry, sandstone on dome","Buddhist; Maurya, late Sunga · Madhya Pradesh, India",-100,4],[193,"Terra cotta warriors from the mausoleum of the first Qin emperor","","c. 221–209 BCE","Painted terra cotta","Qin Dynasty · Lintong, China",-215,2],[194,"Funeral banner of Lady Dai (Xin Zhui)","","180 BCE","Painted silk","Han Dynasty · Mawangdui, China",-180,1],[195,"Longmen caves","","493–1127 CE","Limestone","Tang Dynasty (and others) · Luoyang, China",675,3],[196,"Gold and jade crown","","5th to 6th century CE","Metalwork (gold and jade)","Silla Kingdom · Korea",500,1],[197,"Todai-ji","Unkei, Keikei, and the Kei School (sculptors)","743 CE; rebuilt c. 1700","Bronze and wood (sculpture); wood with ceramic-tile roofing","Nara Period / Kamakura · Nara, Japan",743,5],[198,"Borobudur Temple","","c. 750–842 CE","Volcanic-stone masonry","Sailendra Dynasty · Central Java, Indonesia",796,3],[199,"Angkor, the temple of Angkor Wat, and the city of Angkor Thom","","c. 800–1400 CE","Stone masonry, sandstone","Hindu and Buddhist, Angkor (Khmer) Dynasty · Cambodia",1150,6],[200,"Lakshmana Temple","","c. 930–950 CE","Sandstone","Hindu, Chandella Dynasty · Khajuraho, India",940,4],[201,"Travelers among Mountains and Streams","Fan Kuan","c. 1000 CE","Ink and colors on silk","Northern Song Dynasty · China",1000,1],[202,"Shiva as Lord of Dance (Nataraja)","","c. 11th century CE","Cast bronze","Hindu, Chola Dynasty · Tamil Nadu, India",1050,1],[203,"Night Attack on the Sanjô Palace","","c. 1250–1300 CE","Handscroll (ink and color on paper)","Kamakura Period · Japan",1275,2],[204,"The David Vases","","1351 CE","White porcelain with cobalt-blue underglaze","Yuan Dynasty · China",1351,1],[205,"Portrait of Sin Sukju","Imperial Bureau of Painting","c. 15th century CE","Hanging scroll (ink and color on silk)","Joseon Dynasty · Korea",1460,1],[206,"Forbidden City","","15th century CE and later","Stone masonry, marble, brick, wood, and ceramic tile","Ming Dynasty · Beijing, China",1420,5],[207,"Ryoan-ji","","c. 1480 CE; current design likely 18th century","Rock garden","Muromachi Period · Kyoto, Japan",1480,3],[208,"Jahangir Preferring a Sufi Shaikh to Kings","Bichitr","c. 1620 CE","Watercolor, gold, and ink on paper","Mughal · India",1620,1],[209,"Taj Mahal","Ustad Ahmad Lahori (supervising architect)","1632–1653 CE","Stone masonry and marble with inlay of precious and semiprecious stones; gardens","Mughal · Agra, India",1642,2],[210,"White and Red Plum Blossoms","Ogata Korin","c. 1710–1716 CE","Ink, watercolor, and gold leaf on paper","Rinpa School, Edo Period · Japan",1713,2],[211,"Under the Wave off Kanagawa (The Great Wave)","Katsushika Hokusai","1830–1833 CE","Polychrome woodblock print; ink and color on paper","Ukiyo-e, Edo Period · Japan",1831,1],[212,"Chairman Mao en Route to Anyuan","Unknown (after an oil painting by Liu Chunhua)","c. 1969 CE","Color lithograph","Socialist Realism, Cultural Revolution · China",1969,1],[213,"Nan Madol","","c. 700–1600 CE","Basalt boulders and prismatic columns","Saudeleur Dynasty · Pohnpei, Micronesia",1150,2],[214,"Moai on platform (ahu)","","c. 1100–1600 CE","Volcanic tuff figures on basalt base","Polynesian · Rapa Nui (Easter Island)",1350,1],[215,"'Ahu 'ula (feather cape)","","late 18th century CE","Feathers and fiber","Hawaiian (Polynesia)",1780,1],[216,"Staff god","","late 18th to early 19th century CE","Wood, tapa, fiber, and feathers","Rarotonga, Cook Islands · central Polynesia",1800,3],[217,"Female deity","","c. 18th to 19th century CE","Wood","Nukuoro · Micronesia",1801,1],[218,"Buk (mask)","","mid- to late 19th century CE","Turtle shell, wood, fiber, feathers, and shell","Torres Strait (Mabuiag Island) · Melanesia",1870,1],[219,"Hiapo (tapa)","","c. 1850–1900 CE","Tapa (bark cloth), freehand painting","Niue · Polynesia",1875,1],[220,"Tamati Waka Nene","Gottfried Lindauer","1890 CE","Oil on canvas","Colonial portraiture · New Zealand (Māori subject)",1890,1],[221,"Navigation chart","","19th to early 20th century CE","Wood and fiber","Marshall Islands · Micronesia",1900,1],[222,"Malagan display and mask","","c. 20th century CE","Wood, pigment, fiber, and shell","New Ireland Province · Papua New Guinea",1930,2],[223,"Presentation of Fijian mats and tapa cloths to Queen Elizabeth II","","1953 CE","Multimedia performance (costume, cosmetics, chant, movement, pandanus fiber/hibiscus fiber mats); photographic documentation","Fiji · Polynesia",1953,1],[224,"The Gates","Christo and Jeanne-Claude","1979–2005 CE","Mixed-media installation","Site-specific installation · Central Park, New York City",2005,2],[225,"Vietnam Veterans Memorial","Maya Lin","1982 CE","Granite","Memorial / Minimalism · Washington, D.C.",1982,2],[226,"Horn Players","Jean-Michel Basquiat","1983 CE","Acrylic and oil paintstick on three canvas panels","Neo-Expressionism · New York",1983,1],[227,"Summer Trees","Song Su-nam","1983 CE","Ink on paper","Korean Oriental Ink Painting Movement",1984,1],[228,"Androgyne III","Magdalena Abakanowicz","1985 CE","Burlap, resin, wood, nails, and string","Contemporary sculpture · Poland",1985,1],[229,"A Book from the Sky","Xu Bing","1987–1991 CE","Mixed-media installation","Contemporary installation · China",1989,1],[230,"Pink Panther","Jeff Koons","1988 CE","Glazed porcelain","Neo-Pop / appropriation · U.S.",1988,1],[231,"Untitled (#228), History Portraits series","Cindy Sherman","1990 CE","Photograph","Feminist photography · U.S.",1990,1],[232,"Dancing at the Louvre, The French Collection, Part I; #1","Faith Ringgold","1991 CE","Acrylic on canvas, tie-dyed, pieced fabric border (story quilt)","Contemporary · U.S.",1991,1],[233,"Trade (Gifts for Trading Land with White People)","Jaune Quick-to-See Smith","1992 CE","Oil and mixed media on canvas","Contemporary Native American (Salish-Kootenai) · U.S.",1992,1],[234,"Earth's Creation","Emily Kame Kngwarreye","1994 CE","Synthetic polymer paint on canvas","Contemporary Aboriginal · Utopia, Australia",1994,1],[235,"Rebellious Silence, Women of Allah series","Shirin Neshat (photo by Cynthia Preston)","1994 CE","Ink on photograph","Contemporary · Iran / U.S.",1994.1,1],[236,"En la Barberia no se Llora (No Crying Allowed in the Barbershop)","Pepón Osorio","1994 CE","Mixed-media installation","Contemporary installation · Puerto Rico / U.S.",1994.2,1],[237,"Pisupo Lua Afe (Corned Beef 2000)","Michel Tuffery","1994 CE","Mixed media (flattened corned-beef tins)","Contemporary Pacific · Samoa / New Zealand",1994.3,1],[238,"Electronic Superhighway","Nam June Paik","1995 CE","Mixed-media installation (49-channel closed-circuit video, neon, steel, and electronic components)","Video art · U.S.",1995,1],[239,"The Crossing","Bill Viola","1996 CE","Video/sound installation","Video art · U.S.",1996,1],[240,"Guggenheim Museum Bilbao","Frank Gehry","1997 CE","Titanium, glass, and limestone","Deconstructivism · Bilbao, Spain",1997,3],[241,"Pure Land","Mariko Mori","1998 CE","Color photograph on glass","Contemporary · Japan",1998,1],[242,"Lying with the Wolf","Kiki Smith","2001 CE","Ink and pencil on paper","Contemporary feminist · U.S.",2001,1],[243,"Darkytown Rebellion","Kara Walker","2001 CE","Cut paper and projection on wall","Contemporary installation · U.S.",2001.1,1],[244,"The Swing (after Fragonard)","Yinka Shonibare","2001 CE","Mixed-media installation","Contemporary installation · U.K. / Nigeria",2001.2,1],[245,"Old Man's Cloth","El Anatsui","2003 CE","Aluminum and copper wire","Contemporary · Ghana / Nigeria",2003,1],[246,"Stadia II","Julie Mehretu","2004 CE","Ink and acrylic on canvas","Contemporary abstraction · U.S.",2004,1],[247,"Preying Mantra","Wangechi Mutu","2006 CE","Mixed media on Mylar","Contemporary collage · Kenya / U.S.",2006,1],[248,"Shibboleth","Doris Salcedo","2007–2008 CE","Installation (fissure in floor)","Contemporary installation · Tate Modern, London",2007,1],[249,"MAXXI National Museum of XXI Century Arts","Zaha Hadid","2009 CE","Glass, steel, and cement","Deconstructivism / Parametricism · Rome",2009,2],[250,"Kui Hua Zi (Sunflower Seeds)","Ai Weiwei","2010 CE","Sculpted and painted porcelain","Contemporary installation · China / Tate Modern",2010,1]];
+const W = RAW.map(r => ({n:r[0], title:r[1], artist:r[2], date:r[3], medium:r[4], place:r[5], y:r[6], img:r[7]}));
+const BY = Object.fromEntries(W.map(w => [w.n, w]));
+const UNITS = [
+  [1,"Global Prehistory",1,11],[2,"Ancient Mediterranean",12,51],[3,"Early Europe and Colonial Americas",52,98],
+  [4,"Later Europe and Americas",99,152],[5,"Indigenous Americas",153,166],[6,"Africa",167,180],
+  [7,"West and Central Asia",181,191],[8,"South, East, and Southeast Asia",192,212],[9,"The Pacific",213,223],
+  [10,"Global Contemporary",224,250]];
+const unitOf = n => UNITS.find(u => n >= u[2] && n <= u[3])[0];
+const pad = n => String(n).padStart(3, "0");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $ = s => document.querySelector(s);
+
+const store = {
+  get(k, d){ try { const v = localStorage.getItem("apah." + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("apah." + k, JSON.stringify(v)); } catch(e){} }
+};
+let sel = new Set(store.get("sel", []));
+const opts = Object.assign({hide:false, fields:["date","artist","medium","place"], showTitle:true}, store.get("opts", {}));
+const saveSel = () => { store.set("sel", [...sel]); renderCount(); };
+const saveOpts = () => store.set("opts", opts);
+const selected = () => W.filter(w => sel.has(w.n));
+
+function renderCount(){
+  $("#count").innerHTML = `<b>${sel.size}</b> / 250 selected`;
+}
+
+/* ---------- figure ---------- */
+function figure(w, big){
+  if (w.img){
+    let strip = "";
+    if (w.img > 1){
+      strip = `<div class="views" role="group" aria-label="Views">` + Array.from({length:w.img}, (_, i) =>
+        `<button class="vw${i?"":" on"}" data-src="img/${w.n}-${i+1}.webp" aria-label="View ${i+1} of ${w.img}"><img src="img/${w.n}-${i+1}.webp" alt="" loading="lazy"></button>`).join("") +
+        `<span class="vc">${w.img} views</span></div>`;
+    }
+    return `<div class="fig"><figure><img class="main" src="img/${w.n}-1.webp" alt="${esc(w.title)}"></figure>${strip}</div>`;
+  }
+  const q = encodeURIComponent(w.title + (w.artist ? " " + w.artist : ""));
+  return `<figure><div class="ph"><div class="big">${pad(w.n)}</div>
+    <p>No image bundled for this work yet.</p>
+    <div class="links"><a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">Image search ↗</a>
+    <a href="https://smarthistory.org/?s=${q}" target="_blank" rel="noopener">Smarthistory ↗</a></div></div></figure>`;
+}
+function labelRows(w, hide){
+  const row = (k, v) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`;
+  return `<dl>${row("Date", w.date)}${row("Artist", w.artist || "Unknown / no single artist")}${row("Medium", w.medium)}${row("Movement · place", w.place)}</dl>`;
+}
+
+/* ---------- select view ---------- */
+function renderUnits(){
+  const q = $("#q").value.trim().toLowerCase();
+  const only = $("#onlySel").checked;
+  let html = "", shown = 0;
+  for (const [u, name, a, b] of UNITS){
+    const works = W.filter(w => w.n >= a && w.n <= b);
+    const vis = works.filter(w => (!only || sel.has(w.n)) &&
+      (!q || String(w.n) === q || [w.title, w.artist, w.medium, w.place, w.date].join(" ").toLowerCase().includes(q)));
+    if (!vis.length) continue;
+    shown += vis.length;
+    const on = works.filter(w => sel.has(w.n)).length;
+    const all = on === works.length;
+    html += `<div class="unit"><div class="unit-head"><h3>Unit ${u} · ${name}</h3><span class="rng">${a}–${b} · ${on}/${works.length}</span><span class="sp"></span>
+      <button class="btn ghost" data-unit="${u}" data-mode="${all?"off":"on"}">${all?"Clear unit":"Select unit"}</button></div><div class="grid">`;
+    for (const w of vis){
+      const on1 = sel.has(w.n);
+      html += `<label class="work${on1?" on":""}" data-n="${w.n}"><input type="checkbox" id="w${w.n}" ${on1?"checked":""}>
+        <span class="th">${w.img ? `<i class="sp" style="background-position:${-((w.n-1)%16)*52}px ${-Math.floor((w.n-1)/16)*52}px"></i>` : pad(w.n)}</span>
+        <span class="wt"><span class="no">No. ${pad(w.n)}</span><span class="tt">${esc(w.title)}</span><span class="by">${esc(w.artist || w.place)}</span></span></label>`;
+    }
+    html += `</div></div>`;
+  }
+  $("#units").innerHTML = shown ? html : `<p class="none">No works match “${esc(q)}”.</p>`;
+}
+$("#units").addEventListener("change", e => {
+  const lab = e.target.closest(".work"); if (!lab) return;
+  const n = +lab.dataset.n;
+  e.target.checked ? sel.add(n) : sel.delete(n);
+  lab.classList.toggle("on", e.target.checked);
+  saveSel(); refreshUnitHeads();
+});
+$("#units").addEventListener("click", e => {
+  const b = e.target.closest("[data-unit]"); if (!b) return;
+  const [, , a, z] = UNITS[+b.dataset.unit - 1];
+  for (let n = a; n <= z; n++) b.dataset.mode === "on" ? sel.add(n) : sel.delete(n);
+  saveSel(); renderUnits();
+});
+function refreshUnitHeads(){
+  document.querySelectorAll("[data-unit]").forEach(b => {
+    const [, , a, z] = UNITS[+b.dataset.unit - 1];
+    let on = 0; for (let n = a; n <= z; n++) if (sel.has(n)) on++;
+    const all = on === z - a + 1;
+    b.dataset.mode = all ? "off" : "on"; b.textContent = all ? "Clear unit" : "Select unit";
+    b.parentElement.querySelector(".rng").textContent = `${a}–${z} · ${on}/${z-a+1}`;
+  });
+}
+$("#q").addEventListener("input", renderUnits);
+$("#onlySel").addEventListener("change", renderUnits);
+$("#selAll").onclick = () => { W.forEach(w => sel.add(w.n)); saveSel(); renderUnits(); };
+$("#selNone").onclick = () => { sel.clear(); saveSel(); renderUnits(); };
+
+/* ---------- study view ---------- */
+let deck = [], di = 0;
+function buildDeck(shuffle){
+  deck = selected().map(w => w.n);
+  if (shuffle) shuffleArr(deck);
+  di = 0;
+}
+function shuffleArr(a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function emptyState(where){
+  return `<div class="empty"><h3 class="prompt" style="margin:0">Nothing selected yet</h3>
+    <p>Pick works on the Select tab, or start with all 250 required works.</p>
+    <div class="ctrls"><a class="btn" href="#select">Pick works</a><button class="btn primary" data-useall="${where}">Use all 250</button></div></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-useall]"); if (!b) return;
+  W.forEach(w => sel.add(w.n)); saveSel(); renderUnits();
+  b.dataset.useall === "study" ? (buildDeck(false), renderStudy()) : nextQ();
+});
+function renderStudy(){
+  const body = $("#studyBody");
+  deck = deck.filter(n => sel.has(n));
+  if (!deck.length && sel.size) buildDeck(false);
+  if (!deck.length){ body.innerHTML = emptyState("study"); return; }
+  di = Math.max(0, Math.min(di, deck.length - 1));
+  const w = BY[deck[di]];
+  body.innerHTML = `<div class="stage card-in">${figure(w, true)}
+    <div><div class="label${opts.hide ? " hide" : ""}"><div class="no">No. ${pad(w.n)} · Unit ${unitOf(w.n)}</div>
+      <h3>${esc(w.title)}</h3><p class="maker">${esc(w.artist || "No single named artist")}</p>${labelRows(w)}</div>
+      <div class="ctrls"><button class="btn" id="prev" ${di?"":"disabled"}>← Prev</button>
+      <span class="pos">${di + 1} / ${deck.length}</span>
+      <button class="btn primary" id="next" ${di < deck.length - 1 ? "" : "disabled"}>Next →</button></div>
+      <div class="hint">Keys: ← → to move${opts.hide ? ", space to reveal all" : ""}</div></div></div>`;
+  $("#prev").onclick = () => { di--; renderStudy(); };
+  $("#next").onclick = () => { di++; renderStudy(); };
+}
+$("#studyBody").addEventListener("click", e => {
+  const dd = e.target.closest(".hide dd"); if (dd) dd.classList.add("shown");
+});
+$("#hideDet").checked = opts.hide;
+$("#hideDet").onchange = e => { opts.hide = e.target.checked; saveOpts(); renderStudy(); };
+$("#shuf").onclick = () => { buildDeck(true); renderStudy(); };
+$("#order").onclick = () => { buildDeck(false); renderStudy(); };
+
+/* ---------- quiz ---------- */
+const PROMPT = {date:"When was this made?", artist:"Who made this?", medium:"What is the medium?", place:"What movement / culture and location?"};
+const FIELD_LABEL = {date:"Date", artist:"Artist", medium:"Medium", place:"Movement · place"};
+let qs = {right:0, total:0, streak:0}, cur = null, missed = new Set(), missedMode = false;
+
+function gapFor(y){ return y < -1000 ? 800 : y < 0 ? 150 : y < 1000 ? 100 : y < 1700 ? 25 : y < 1900 ? 12 : 4; }
+function distractors(w, f){
+  const pick = (pool) => { const out = []; for (const v of shuffleArr(pool)) { if (v !== w[f] && !out.includes(v)) out.push(v); if (out.length === 3) break; } return out; };
+  if (f === "date" || f === "artist"){
+    const g = f === "date" ? gapFor(w.y) : 0;
+    const pool = W.filter(x => x.n !== w.n && x[f] && x[f] !== w[f] && Math.abs(x.y - w.y) >= g)
+      .sort((a, b) => Math.abs(a.y - w.y) - Math.abs(b.y - w.y));
+    const uniq = [...new Set(pool.map(x => x[f]))];
+    return pick(uniq.slice(0, 10));
+  }
+  const u = unitOf(w.n);
+  const same = [...new Set(W.filter(x => unitOf(x.n) === u).map(x => x[f]))];
+  let out = pick(same);
+  if (out.length < 3){ const rest = pick([...new Set(W.map(x => x[f]))].filter(v => !out.includes(v))); out = out.concat(rest).slice(0, 3); }
+  return out;
+}
+function nextQ(){
+  const body = $("#quizBody");
+  let pool = selected();
+  if (missedMode){ pool = pool.filter(w => missed.has(w.n)); if (!pool.length){ missedMode = false; pool = selected(); } }
+  if (!pool.length){ body.innerHTML = emptyState("quiz"); renderScore(); return; }
+  const fields = opts.fields.length ? opts.fields : ["date","artist","medium","place"];
+  let w, f, tries = 0;
+  do {
+    w = pool[Math.floor(Math.random() * pool.length)];
+    const avail = fields.filter(k => k !== "artist" || w.artist);
+    f = avail[Math.floor(Math.random() * avail.length)];
+  } while ((!f || (cur && pool.length > 1 && w.n === cur.w.n)) && ++tries < 40);
+  if (!f) f = fields.find(k => k !== "artist") || "date";
+  const choices = shuffleArr([w[f], ...distractors(w, f)]);
+  cur = {w, f, choices, done:false};
+  renderQ();
+}
+function renderQ(){
+  const {w, f, choices, done, picked} = cur;
+  const showT = opts.showTitle || !w.img;
+  $("#quizBody").innerHTML = `<div class="stage card-in">${figure(w, true)}<div>
+    ${showT ? `<p class="qtitle">No. ${pad(w.n)} · ${esc(w.title)}</p>` : `<p class="qtitle mute">Title hidden</p>`}
+    <p class="prompt">${PROMPT[f]}</p>
+    <div class="opts">${choices.map((c, i) => {
+      let cls = "opt";
+      if (done){ if (c === w[f]) cls += " right"; else if (i === picked) cls += " wrong"; }
+      return `<button class="${cls}" data-i="${i}" data-k="${i+1}" ${done?"disabled":""}>${esc(c)}</button>`;
+    }).join("")}</div>
+    ${done ? `<div class="verdict">${picked === -1 ? "" : (choices[picked] === w[f] ? `<b class="ok">Correct.</b>` : `<b class="no">Not quite.</b>`)}
+      <span style="color:var(--muted)">No. ${pad(w.n)} · ${esc(w.title)}</span>${labelRows(w)}</div>
+      <div class="ctrls"><button class="btn primary" id="nq">Next question →</button><span class="sp"></span>
+      ${missed.size ? `<button class="btn ghost" id="mm">${missedMode ? "Quiz all selected" : `Quiz missed only (${missed.size})`}</button>` : ""}</div>
+      <div class="hint">Enter for next question</div>`
+    : `<div class="hint">Keys: 1–4 to answer</div>`}</div></div>`;
+  if (done){
+    $("#nq").onclick = nextQ;
+    const mm = $("#mm"); if (mm) mm.onclick = () => { missedMode = !missedMode; nextQ(); };
+    $("#nq").focus({preventScroll:true});
+  }
+  renderScore();
+}
+function answer(i){
+  if (!cur || cur.done) return;
+  cur.done = true; cur.picked = i;
+  const ok = cur.choices[i] === cur.w[cur.f];
+  qs.total++; if (ok){ qs.right++; qs.streak++; missed.delete(cur.w.n); } else { qs.streak = 0; missed.add(cur.w.n); }
+  renderQ();
+}
+$("#quizBody").addEventListener("click", e => { const b = e.target.closest(".opt"); if (b) answer(+b.dataset.i); });
+function renderScore(){
+  const pct = qs.total ? Math.round(100 * qs.right / qs.total) + "%" : "–";
+  $("#score").innerHTML = `<div>${qs.right}/${qs.total} <span>right</span></div><div>${pct}</div><div>${qs.streak} <span>streak</span></div>`;
+}
+document.querySelectorAll(".qf").forEach(c => {
+  c.checked = opts.fields.includes(c.value);
+  c.onchange = () => {
+    opts.fields = [...document.querySelectorAll(".qf:checked")].map(x => x.value);
+    if (!opts.fields.length){ c.checked = true; opts.fields = [c.value]; }
+    saveOpts(); if (cur && !cur.done) nextQ();
+  };
+});
+$("#showTitle").checked = opts.showTitle;
+$("#showTitle").onchange = e => { opts.showTitle = e.target.checked; saveOpts(); if (cur) renderQ(); };
+
+document.addEventListener("click", e => {
+  const b = e.target.closest(".vw"); if (!b) return;
+  const fig = b.closest(".fig");
+  fig.querySelector("img.main").src = b.dataset.src;
+  fig.querySelectorAll(".vw").forEach(x => x.classList.toggle("on", x === b));
+});
+/* ---------- routing & keys ---------- */
+let view = "select";
+function route(){
+  const h = location.hash.slice(1);
+  view = ["select","study","quiz"].includes(h) ? h : "select";
+  for (const v of ["select","study","quiz"]) $("#v-" + v).hidden = v !== view;
+  document.querySelectorAll("nav a").forEach(a => a.dataset.v === view ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
+  if (view === "select") renderUnits();
+  if (view === "study"){ if (!deck.length || deck.some(n => !sel.has(n)) || deck.length !== sel.size) buildDeck(false); renderStudy(); }
+  if (view === "quiz"){ if (!cur || !sel.has(cur.w.n)) nextQ(); else renderQ(); }
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll("nav a").forEach(a => a.addEventListener("click", () => { if (location.hash === "#" + a.dataset.v) route(); }));
+window.addEventListener("hashchange", route);
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (view === "study" && deck.length){
+    if (e.key === "ArrowRight" && di < deck.length - 1){ di++; renderStudy(); }
+    else if (e.key === "ArrowLeft" && di > 0){ di--; renderStudy(); }
+    else if (e.key === " " && opts.hide){ e.preventDefault(); document.querySelectorAll(".hide dd").forEach(d => d.classList.add("shown")); }
+  }
+  if (view === "quiz" && cur){
+    if (!cur.done && /^[1-4]$/.test(e.key) && +e.key <= cur.choices.length) answer(+e.key - 1);
+    else if (cur.done && e.key === "Enter" && e.target.tagName !== "BUTTON"){ e.preventDefault(); nextQ(); }
+  }
+});
+renderCount(); route();
+</script>
+</body>
+</html>
