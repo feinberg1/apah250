@@ -225,10 +225,10 @@ function figure(w, big){
     let strip = "";
     if (w.img > 1){
       strip = `<div class="views" role="group" aria-label="Views">` + Array.from({length:w.img}, (_, i) =>
-        `<button class="vw${i?"":" on"}" data-src="img/${w.n}-${i+1}.webp" aria-label="View ${i+1} of ${w.img}"><img src="img/${w.n}-${i+1}.webp" alt="" loading="lazy"></button>`).join("") +
+        `<button class="vw${i?"":" on"}" data-src="${w.n}-${i+1}.webp" aria-label="View ${i+1} of ${w.img}"><img src="${w.n}-${i+1}.webp" alt="" loading="lazy"></button>`).join("") +
         `<span class="vc">${w.img} views</span></div>`;
     }
-    return `<div class="fig"><figure><img class="main" src="img/${w.n}-1.webp" alt="${esc(w.title)}"></figure>${strip}</div>`;
+    return `<div class="fig"><figure><img class="main" src="${w.n}-1.webp" alt="${esc(w.title)}"></figure>${strip}</div>`;
   }
   const q = encodeURIComponent(w.title + (w.artist ? " " + w.artist : ""));
   return `<figure><div class="ph"><div class="big">${pad(w.n)}</div>
